@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventsService } from '../events.service';
+import { EventsService } from './events.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Event } from '../entities/event.entity';
+import { Event } from './entities/event.entity';
 
 describe('EventsService', () => {
   let service: EventsService;

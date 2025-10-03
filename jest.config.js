@@ -4,7 +4,16 @@ module.exports = {
   roots: ['<rootDir>/apps', '<rootDir>/packages'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        module: 'commonjs',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        experimentalDecorators: true,
+        emitDecoratorMetadata: true,
+        strictPropertyInitialization: false,
+      }
+    }],
   },
   collectCoverageFrom: [
     '**/*.ts',
@@ -19,4 +28,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   verbose: true,
+  moduleFileExtensions: ['js', 'json', 'ts'],
 };

@@ -19,8 +19,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",

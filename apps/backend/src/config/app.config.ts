@@ -26,9 +26,6 @@ export class AppConfig {
   }
 
   get rabbitMqUrl(): string {
-    return this.configService.get<string>(
-      'RABBITMQ_URL',
-      'amqp://guest:guest@localhost:5672',
-    );
+    return this.configService.get<string>('RABBITMQ_URL', 'amqp://guest:guest@localhost:5672');
   }
 }

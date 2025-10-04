@@ -47,6 +47,5 @@ tmp/
 
 # Package manager
 .pnpm-store/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml

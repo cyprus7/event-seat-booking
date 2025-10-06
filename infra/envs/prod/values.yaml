@@ -1,6 +1,7 @@
 image:
   repo: ghcr.io/cyprus7/event-seat-booking
-  tag: latest
+  tag: 28368da2b7577abb5cd2ed502c47c66d057f9444
+  repository: ghcr.io/cyprus7/event-seat-booking
 host: seats.test.chernov.us
 ingress:
   enabled: true
@@ -11,15 +12,6 @@ backend:
   replicas: 2
   extraEnv:
     - name: ENABLE_SWAGGER
-      value: "true"
-
-# If your images are hosted in a private registry (e.g. GHCR), create a docker-registry secret in namespace 'prod'
-# and set its name below so Kubernetes can pull the images.
-# Example to create secret:
-# kubectl -n prod create secret docker-registry regcred \
-#   --docker-server=ghcr.io \
-#   --docker-username=<GITHUB_USER> \
-#   --docker-password=<PERSONAL_ACCESS_TOKEN> \
-#   --docker-email=<EMAIL>
-imagePullSecrets: [] # Example: [{ name: "regcred" }]
+      value: 'true'
+imagePullSecrets: []
 imagePullPolicy: IfNotPresent

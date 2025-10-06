@@ -10,3 +10,6 @@ frontend:
 backend:
   replicas: 2
   extraEnv: []
+# Новые опции для управления доступом к приватным реестрам / политикой pull
+imagePullSecrets: []        # Example: [{ name: "regcred" }] — задаётся в envs/prod/values.yaml
+imagePullPolicy: IfNotPresent

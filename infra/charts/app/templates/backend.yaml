@@ -19,9 +19,14 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: backend
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       containers:
         - name: backend
           image: {{ printf "%s/backend:%s" .Values.image.repo .Values.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3001
           env:

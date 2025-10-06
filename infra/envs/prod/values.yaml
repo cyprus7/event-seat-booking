@@ -12,3 +12,14 @@ backend:
   extraEnv:
     - name: ENABLE_SWAGGER
       value: "true"
+
+# If your images are hosted in a private registry (e.g. GHCR), create a docker-registry secret in namespace 'prod'
+# and set its name below so Kubernetes can pull the images.
+# Example to create secret:
+# kubectl -n prod create secret docker-registry regcred \
+#   --docker-server=ghcr.io \
+#   --docker-username=<GITHUB_USER> \
+#   --docker-password=<PERSONAL_ACCESS_TOKEN> \
+#   --docker-email=<EMAIL>
+imagePullSecrets: [] # Example: [{ name: "regcred" }]
+imagePullPolicy: IfNotPresent

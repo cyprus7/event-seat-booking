@@ -19,9 +19,14 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: frontend
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       containers:
         - name: frontend
           image: {{ printf "%s/frontend:%s" .Values.image.repo .Values.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 3000
           env:

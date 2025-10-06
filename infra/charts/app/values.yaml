@@ -1,0 +1,12 @@
+image:
+  repo: ghcr.io/cyprus7/event-seat-booking
+  tag: latest
+host: seats.test.chernov.us
+ingress:
+  enabled: true
+  className: nginx
+frontend:
+  replicas: 2
+backend:
+  replicas: 2
+  extraEnv: []

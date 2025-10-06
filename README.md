@@ -46,8 +46,8 @@ event-seat-booking/
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+- Node.js >= 22.0.0
+- npm >= 10.0.0
 - Docker & Docker Compose (for services)
 
 ### Installation

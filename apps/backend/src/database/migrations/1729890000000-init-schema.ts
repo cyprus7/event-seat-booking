@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class InitSchema1729890000000 implements MigrationInterface {
-  name = 'InitSchema1729890000000';
+    name = 'InitSchema1729890000000'
 
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "events" (
         "id" SERIAL PRIMARY KEY,
         "name" VARCHAR(255) NOT NULL,
@@ -16,9 +16,9 @@ export class InitSchema1729890000000 implements MigrationInterface {
         "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
         "updated_at" TIMESTAMP NOT NULL DEFAULT NOW()
       );
-    `);
+    `)
 
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "bookings" (
         "id" SERIAL PRIMARY KEY,
         "event_id" INT NOT NULL REFERENCES "events" ("id") ON DELETE CASCADE,
@@ -26,9 +26,9 @@ export class InitSchema1729890000000 implements MigrationInterface {
         "created_at" TIMESTAMP NOT NULL DEFAULT NOW(),
         CONSTRAINT "UQ_bookings_event_user" UNIQUE ("event_id", "user_id")
       );
-    `);
+    `)
 
-    await queryRunner.query(`
+        await queryRunner.query(`
       CREATE OR REPLACE FUNCTION reserve_event_seat(p_event_id INT, p_user_id TEXT)
       RETURNS TABLE(
         booking_id INT,
@@ -75,12 +75,12 @@ export class InitSchema1729890000000 implements MigrationInterface {
         RETURN QUERY SELECT v_booking_id, p_event_id, p_user_id, v_remaining, v_event.total_seats, TRUE;
       END;
       $$;
-    `);
-  }
+    `)
+    }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP FUNCTION IF EXISTS reserve_event_seat(integer, text);');
-    await queryRunner.query('DROP TABLE IF EXISTS "bookings";');
-    await queryRunner.query('DROP TABLE IF EXISTS "events";');
-  }
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query('DROP FUNCTION IF EXISTS reserve_event_seat(integer, text);')
+        await queryRunner.query('DROP TABLE IF EXISTS "bookings";')
+        await queryRunner.query('DROP TABLE IF EXISTS "events";')
+    }
 }

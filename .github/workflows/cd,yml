@@ -1,0 +1,84 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+    branches: [main, develop]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    env:
+      GHCR_REPO: ghcr.io/${{ github.repository }}
+      ENV_DIR: ${{ github.event.workflow_run.head_branch == 'main' && 'infra/envs/prod' || 'infra/envs/sandbox' }}
+      TAG_ENV: ${{ github.event.workflow_run.head_branch == 'main' && 'prod' || 'sandbox' }}
+      SHA_TAG: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Checkout repo at the commit from CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          push: true
+          tags: |
+            ${{ env.GHCR_REPO }}/backend:${{ env.SHA_TAG }}
+            ${{ env.GHCR_REPO }}/backend:${{ env.TAG_ENV }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA_TAG }}
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/frontend
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=/api/v1
+          tags: |
+            ${{ env.GHCR_REPO }}/frontend:${{ env.SHA_TAG }}
+            ${{ env.GHCR_REPO }}/frontend:${{ env.TAG_ENV }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA_TAG }}
+
+      - name: Install yq
+        run: |
+          sudo pip install yq >/dev/null 2>&1 || true
+
+      - name: Bump image tag in env values
+        run: |
+          VALUES="${ENV_DIR}/values.yaml"
+          grep -q '^image:' "$VALUES" || printf "image:\n  repository: %s\n  tag: %s\n" "${GHCR_REPO}" "${SHA_TAG}" >> "$VALUES"
+
+          yq -iy ".image.repository = \"${GHCR_REPO}\"" "$VALUES"
+          yq -iy ".image.tag = \"${SHA_TAG}\"" "$VALUES"
+
+      - name: Commit & push changes (values.yaml)
+        run: |
+          git config user.name "ci-cd-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy: ${SHA_TAG} -> ${ENV_DIR}" || echo "no changes"
+          git push

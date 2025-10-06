@@ -1,13 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { EventsService } from './events.service';
@@ -37,7 +38,7 @@ export class EventsController {
   @ApiOperation({ summary: 'Get event by ID' })
   @ApiResponse({ status: 200, description: 'Return event by ID' })
   @ApiResponse({ status: 404, description: 'Event not found' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
   }
 
@@ -45,7 +46,7 @@ export class EventsController {
   @ApiOperation({ summary: 'Update event' })
   @ApiResponse({ status: 200, description: 'Event updated successfully' })
   @ApiResponse({ status: 404, description: 'Event not found' })
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(id, updateEventDto);
   }
 
@@ -54,7 +55,7 @@ export class EventsController {
   @ApiOperation({ summary: 'Delete event' })
   @ApiResponse({ status: 204, description: 'Event deleted successfully' })
   @ApiResponse({ status: 404, description: 'Event not found' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.remove(id);
   }
 }

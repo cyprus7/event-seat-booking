@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { Transport } from '@nestjs/microservices';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { setupObservability } from './observability/otel';
 
 async function bootstrap() {
+  await setupObservability();
   const app = await NestFactory.create(AppModule);
 
   // Global prefix
@@ -33,6 +36,21 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
+  const bookingQueue = process.env.RABBITMQ_BOOKING_QUEUE || 'booking_reservations';
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [rabbitMqUrl],
+      queue: bookingQueue,
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

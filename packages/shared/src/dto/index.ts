@@ -15,10 +15,8 @@ export interface UpdateEventDto {
 }
 
 export interface CreateBookingDto {
-  eventId: string;
-  customerName: string;
-  customerEmail: string;
-  numberOfSeats: number;
+  eventId: number;
+  userId: string;
 }
 
 export interface CreateUserDto {

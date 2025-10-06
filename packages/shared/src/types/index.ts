@@ -1,5 +1,5 @@
 export interface Event {
-  id: string;
+  id: number;
   name: string;
   description: string;
   eventDate: Date;
@@ -11,20 +11,10 @@ export interface Event {
 }
 
 export interface Booking {
-  id: string;
-  eventId: string;
-  customerName: string;
-  customerEmail: string;
-  numberOfSeats: number;
-  status: BookingStatus;
+  id: number;
+  eventId: number;
+  userId: string;
   createdAt: Date;
-  updatedAt: Date;
-}
-
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
 }
 
 export interface User {

@@ -3,49 +3,30 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { Event } from '../../events/entities/event.entity';
 
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-}
-
 @Entity('bookings')
+@Unique(['eventId', 'userId'])
 export class Booking {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column('uuid')
-  eventId: string;
+  @Column({ name: 'event_id', type: 'int' })
+  eventId: number;
 
-  @ManyToOne(() => Event)
-  @JoinColumn({ name: 'eventId' })
+  @ManyToOne(() => Event, event => event.bookings, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'event_id' })
   event: Event;
 
-  @Column()
-  customerName: string;
+  @Column({ name: 'user_id', type: 'varchar', length: 255 })
+  userId: string;
 
-  @Column()
-  customerEmail: string;
-
-  @Column('int')
-  numberOfSeats: number;
-
-  @Column({
-    type: 'enum',
-    enum: BookingStatus,
-    default: BookingStatus.PENDING,
-  })
-  status: BookingStatus;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

@@ -54,7 +54,8 @@ jobs:
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/frontend
+          # Use repo root as build context so Docker build can access monorepo workspaces/packages
+          context: .
           file: ./apps/frontend/Dockerfile
           push: true
           build-args: |

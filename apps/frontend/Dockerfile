@@ -1,4 +1,4 @@
-# Stage: builder
+# Stage: builder (context = repo root)
 FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NODE_ENV=production
@@ -7,27 +7,28 @@ ENV NODE_ENV=production
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# Install dependencies (use npm install because package-lock.json may be absent in workspace)
+# Copy root package files and frontend package.json so npm can resolve workspaces
 COPY package*.json ./
-RUN npm install --no-audit --no-fund
+COPY apps/frontend/package*.json ./apps/frontend/
 
-# Copy sources and build
+# Install dependencies for the frontend workspace (including dev deps needed for build)
+RUN npm install --workspace=apps/frontend --include=dev --no-audit --no-fund
+
+# Copy full repository (needed for workspace sources, shared packages, and the frontend sources)
 COPY . .
-RUN npm run build
+
+# Build only the frontend workspace
+RUN npm --workspace=apps/frontend run build
 
 # Stage: runner
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy built assets and package.json
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-
-# Install only production deps
-RUN npm install --only=production --no-audit --no-fund
+# Copy node_modules and built frontend into runner
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/frontend ./
 
 EXPOSE 3000
-# Use npm start (expects "start": "next start" in package.json)
+# Start frontend from workspace package.json (expects "start": "next start")
 CMD ["npm", "start"]

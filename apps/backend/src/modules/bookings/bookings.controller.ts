@@ -1,48 +1,81 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { BookingsService } from './bookings.service';
-import { CreateBookingDto } from './dto/create-booking.dto';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseIntPipe,
+    Post,
+} from '@nestjs/common'
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { BookingsService } from './bookings.service'
+import { CreateBookingDto } from './dto/create-booking.dto'
+import { ReserveBookingDto } from './dto/reserve-booking.dto'
+import { BookingsGatewayService } from './bookings.gateway.service'
+import { ReserveBookingResponseDto } from './dto/reserve-booking-response.dto'
 
 @ApiTags('bookings')
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+    constructor(
+        private readonly bookingsService: BookingsService,
+        private readonly bookingsGatewayService: BookingsGatewayService,
+    ) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create a new booking' })
-  @ApiResponse({ status: 201, description: 'Booking created successfully' })
-  create(@Body() createBookingDto: CreateBookingDto) {
-    return this.bookingsService.create(createBookingDto);
-  }
+    @Post()
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Create a new booking' })
+    @ApiResponse({
+        status: 200,
+        type: ReserveBookingResponseDto,
+        description: 'Booking created successfully or existing booking returned',
+    })
+    create(@Body() createBookingDto: CreateBookingDto) {
+        return this.bookingsGatewayService.reserve(createBookingDto)
+    }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all bookings' })
-  @ApiResponse({ status: 200, description: 'Return all bookings' })
-  findAll() {
-    return this.bookingsService.findAll();
-  }
+    @Post('reserve')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Reserve a seat for an event' })
+    @ApiResponse({
+        status: 200,
+        type: ReserveBookingResponseDto,
+        description: 'Reservation processed via booking service',
+    })
+    reserve(@Body() reserveBookingDto: ReserveBookingDto) {
+        return this.bookingsGatewayService.reserve(reserveBookingDto)
+    }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get booking by ID' })
-  @ApiResponse({ status: 200, description: 'Return booking by ID' })
-  @ApiResponse({ status: 404, description: 'Booking not found' })
-  findOne(@Param('id') id: string) {
-    return this.bookingsService.findOne(id);
-  }
+    @Get()
+    @ApiOperation({ summary: 'Get all bookings' })
+    @ApiResponse({ status: 200, description: 'Return all bookings' })
+    findAll() {
+        return this.bookingsService.findAll()
+    }
 
-  @Get('event/:eventId')
-  @ApiOperation({ summary: 'Get bookings by event ID' })
-  @ApiResponse({ status: 200, description: 'Return bookings for event' })
-  findByEvent(@Param('eventId') eventId: string) {
-    return this.bookingsService.findByEvent(eventId);
-  }
+    @Get(':id')
+    @ApiOperation({ summary: 'Get booking by ID' })
+    @ApiResponse({ status: 200, description: 'Return booking by ID' })
+    @ApiResponse({ status: 404, description: 'Booking not found' })
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.bookingsService.findOne(id)
+    }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete booking' })
-  @ApiResponse({ status: 204, description: 'Booking deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Booking not found' })
-  remove(@Param('id') id: string) {
-    return this.bookingsService.remove(id);
-  }
+    @Get('event/:eventId')
+    @ApiOperation({ summary: 'Get bookings by event ID' })
+    @ApiResponse({ status: 200, description: 'Return bookings for event' })
+    findByEvent(@Param('eventId', ParseIntPipe) eventId: number) {
+        return this.bookingsService.findByEvent(eventId)
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete booking' })
+    @ApiResponse({ status: 204, description: 'Booking deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Booking not found' })
+    remove(@Param('id', ParseIntPipe) id: number) {
+        return this.bookingsService.remove(id)
+    }
 }

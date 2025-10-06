@@ -1,37 +1,42 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    OneToMany,
+} from 'typeorm'
+import { Booking } from '../../bookings/entities/booking.entity'
 
 @Entity('events')
 export class Event {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn()
+    id: number
 
-  @Column()
-  name: string;
+    @Column({ type: 'varchar', length: 255 })
+    name: string
 
-  @Column('text')
-  description: string;
+    @Column('text')
+    description: string
 
-  @Column('timestamp')
-  eventDate: Date;
+    @Column({ name: 'event_date', type: 'timestamp' })
+    eventDate: Date
 
-  @Column()
-  venue: string;
+    @Column({ type: 'varchar', length: 255 })
+    venue: string
 
-  @Column('int')
-  totalSeats: number;
+    @Column({ name: 'total_seats', type: 'int' })
+    totalSeats: number
 
-  @Column('int', { default: 0 })
-  bookedSeats: number;
+    @Column({ name: 'booked_seats', type: 'int', default: 0 })
+    bookedSeats: number
 
-  @CreateDateColumn()
-  createdAt: Date;
+    @CreateDateColumn({ name: 'created_at' })
+    createdAt: Date
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @UpdateDateColumn({ name: 'updated_at' })
+    updatedAt: Date
+
+    @OneToMany(() => Booking, (booking) => booking.event)
+    bookings: Booking[]
 }

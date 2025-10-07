@@ -1,6 +1,6 @@
 image:
   repo: ghcr.io/cyprus7/event-seat-booking
-  tag: b7176357d4a8d8ae6c952be6eb851be9efb0d974
+  tag: 08c86ffc6405e74bb1239fc89263d1bcfee031f0
   repository: ghcr.io/cyprus7/event-seat-booking
 host: seats.test.chernov.us
 ingress:

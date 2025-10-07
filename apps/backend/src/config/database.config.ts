@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class DatabaseConfig implements TypeOrmOptionsFactory {
-    constructor(private configService: ConfigService) { }
+    constructor(private configService: ConfigService) {}
 
     private parsePostgresUrl(urlStr: string | undefined) {
         if (!urlStr) return null
@@ -28,9 +28,12 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
 
         const host = parsed?.host ?? this.configService.get<string>('DB_HOST', 'localhost')
         const port = parsed?.port ?? this.configService.get<number>('DB_PORT', 5432)
-        const username = parsed?.username ?? this.configService.get<string>('DB_USERNAME', 'postgres')
-        const password = parsed?.password ?? this.configService.get<string>('DB_PASSWORD', 'postgres')
-        const database = parsed?.database ?? this.configService.get<string>('DB_NAME', 'event_booking')
+        const username =
+            parsed?.username ?? this.configService.get<string>('DB_USERNAME', 'postgres')
+        const password =
+            parsed?.password ?? this.configService.get<string>('DB_PASSWORD', 'postgres')
+        const database =
+            parsed?.database ?? this.configService.get<string>('DB_NAME', 'event_booking')
 
         return {
             type: 'postgres',

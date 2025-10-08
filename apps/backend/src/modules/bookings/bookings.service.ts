@@ -7,6 +7,8 @@ import { BookingIdentifiersDto } from './dto/booking-identifiers.dto'
 import { ReserveBookingResponseDto } from './dto/reserve-booking-response.dto'
 import { MetricsService } from '../../common/observability/metrics.service'
 import { withOtelSpan } from '../../common/observability/tracing'
+import { EventAttendeesDto } from './dto/event-attendees.dto'
+import { BookingAttendeeDto } from './dto/event-attendees.dto'
 
 interface ReservationRow {
     booking_id: number
@@ -133,6 +135,43 @@ export class BookingsService {
                 }),
             { eventId },
         )
+    }
+
+    async getEventAttendees(): Promise<EventAttendeesDto[]> {
+        return withOtelSpan('BookingsService.getEventAttendees', async () => {
+            const bookings = await this.bookingsRepository.find({ relations: ['event'] })
+
+            const grouped = new Map<
+                number,
+                { eventName: string; attendees: BookingAttendeeDto[] }
+            >()
+
+            for (const booking of bookings) {
+                const existing = grouped.get(booking.eventId) ?? {
+                    eventName: booking.event?.name ?? 'Unknown event',
+                    attendees: [],
+                }
+
+                existing.eventName = booking.event?.name ?? existing.eventName
+                existing.attendees = [
+                    ...existing.attendees,
+                    {
+                        userId: booking.userId,
+                        bookedAt: booking.createdAt.toISOString(),
+                    },
+                ]
+
+                grouped.set(booking.eventId, existing)
+            }
+
+            return Array.from(grouped.entries())
+                .map(([eventId, value]) => ({
+                    eventId,
+                    eventName: value.eventName,
+                    attendees: value.attendees.sort((a, b) => a.bookedAt.localeCompare(b.bookedAt)),
+                }))
+                .sort((a, b) => a.eventName.localeCompare(b.eventName))
+        })
     }
 
     async remove(id: number): Promise<void> {

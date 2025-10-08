@@ -9,6 +9,7 @@ import { BookingsQueueController } from './bookings.queue.controller'
 import { BookingsGatewayService } from './bookings.gateway.service'
 import { MetricsService } from '../../common/observability/metrics.service'
 import { BOOKING_SERVICE_CLIENT } from './bookings.constants'
+import { BookingsStreamService } from './bookings.stream.service'
 
 @Module({
     imports: [ConfigModule, TypeOrmModule.forFeature([Booking])],
@@ -17,6 +18,7 @@ import { BOOKING_SERVICE_CLIENT } from './bookings.constants'
         BookingsService,
         MetricsService,
         BookingsGatewayService,
+        BookingsStreamService,
         {
             provide: BOOKING_SERVICE_CLIENT,
             useFactory: (configService: ConfigService) =>

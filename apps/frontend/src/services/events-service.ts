@@ -27,7 +27,7 @@ export async function fetchEventsForUser(userId: string): Promise<UserEvent[]> {
             'x-user-id': userId,
         },
         cache: 'no-store',
-    })
+    } as any)
 
     if (!response.ok) {
         throw new Error('Не удалось загрузить мероприятия')

@@ -2,16 +2,21 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { EventsService } from './events.service'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Event } from './entities/event.entity'
+import { Booking } from '../bookings/entities/booking.entity'
 
 describe('EventsService', () => {
     let service: EventsService
 
-    const mockRepository = {
+    const mockEventsRepository = {
         create: jest.fn(),
         save: jest.fn(),
         find: jest.fn(),
         findOne: jest.fn(),
         remove: jest.fn(),
+    }
+
+    const mockBookingsRepository = {
+        find: jest.fn(),
     }
 
     beforeEach(async () => {
@@ -20,7 +25,11 @@ describe('EventsService', () => {
                 EventsService,
                 {
                     provide: getRepositoryToken(Event),
-                    useValue: mockRepository,
+                    useValue: mockEventsRepository,
+                },
+                {
+                    provide: getRepositoryToken(Booking),
+                    useValue: mockBookingsRepository,
                 },
             ],
         }).compile()
@@ -34,12 +43,12 @@ describe('EventsService', () => {
 
     describe('findAll', () => {
         it('should return an array of events', async () => {
-            const events = [{ id: '1', name: 'Test Event' }]
-            mockRepository.find.mockResolvedValue(events)
+            const events = [{ id: 1, name: 'Test Event' }]
+            mockEventsRepository.find.mockResolvedValue(events)
 
             const result = await service.findAll()
             expect(result).toEqual(events)
-            expect(mockRepository.find).toHaveBeenCalled()
+            expect(mockEventsRepository.find).toHaveBeenCalled()
         })
     })
 })

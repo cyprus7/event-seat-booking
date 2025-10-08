@@ -12,7 +12,7 @@ export interface AdminEventAttendees {
 }
 
 export async function fetchEventAttendees(): Promise<AdminEventAttendees[]> {
-    const response = await fetch(`${API_URL}/bookings/attendees`, { cache: 'no-store' })
+    const response = await fetch(`${API_URL}/bookings/attendees`, { cache: 'no-store' } as any)
 
     if (!response.ok) {
         throw new Error('Failed to load attendees')

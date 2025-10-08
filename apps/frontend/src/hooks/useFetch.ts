@@ -2,21 +2,20 @@ import { useState, useEffect } from 'react'
 
 export function useFetch<T>(url: string) {
     const [data, setData] = useState<T | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setLoading(true)
                 const response = await fetch(url)
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`)
+                    throw new Error('Network response was not ok')
                 }
-                const result = await response.json()
+                const result: T = await response.json()
                 setData(result)
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred')
+                setError((err as Error).message)
             } finally {
                 setLoading(false)
             }

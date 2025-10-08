@@ -5,9 +5,11 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    MessageEvent,
     Param,
     ParseIntPipe,
     Post,
+    Sse,
 } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { BookingsService } from './bookings.service'
@@ -15,6 +17,8 @@ import { CreateBookingDto } from './dto/create-booking.dto'
 import { ReserveBookingDto } from './dto/reserve-booking.dto'
 import { BookingsGatewayService } from './bookings.gateway.service'
 import { ReserveBookingResponseDto } from './dto/reserve-booking-response.dto'
+import { BookingsStreamService } from './bookings.stream.service'
+import { Observable } from 'rxjs'
 
 @ApiTags('bookings')
 @Controller('bookings')
@@ -22,6 +26,7 @@ export class BookingsController {
     constructor(
         private readonly bookingsService: BookingsService,
         private readonly bookingsGatewayService: BookingsGatewayService,
+        private readonly bookingsStreamService: BookingsStreamService,
     ) {}
 
     @Post()
@@ -68,6 +73,19 @@ export class BookingsController {
     @ApiResponse({ status: 200, description: 'Return bookings for event' })
     findByEvent(@Param('eventId', ParseIntPipe) eventId: number) {
         return this.bookingsService.findByEvent(eventId)
+    }
+
+    @Get('attendees')
+    @ApiOperation({ summary: 'Get attendees grouped by event' })
+    @ApiResponse({ status: 200, description: 'Return attendees grouped by event' })
+    findAttendees() {
+        return this.bookingsService.getEventAttendees()
+    }
+
+    @Sse('attendees/stream')
+    @ApiOperation({ summary: 'Stream attendees grouped by event' })
+    attendeesStream(): Observable<MessageEvent> {
+        return this.bookingsStreamService.stream
     }
 
     @Delete(':id')

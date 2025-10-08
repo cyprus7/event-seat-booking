@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    Headers,
     HttpCode,
     HttpStatus,
     Param,
@@ -30,7 +31,11 @@ export class EventsController {
     @Get()
     @ApiOperation({ summary: 'Get all events' })
     @ApiResponse({ status: 200, description: 'Return all events' })
-    findAll() {
+    findAll(@Headers('x-user-id') userId?: string) {
+        const sanitizedUserId = userId?.trim()
+        if (sanitizedUserId) {
+            return this.eventsService.findAllWithUserStatus(sanitizedUserId)
+        }
         return this.eventsService.findAll()
     }
 

@@ -29,31 +29,47 @@ export class InitSchema1729890000000 implements MigrationInterface {
     `)
 
         await queryRunner.query(`
-      CREATE OR REPLACE FUNCTION reserve_event_seat(p_event_id INT, p_user_id TEXT)
+      CREATE OR REPLACE FUNCTION public.reserve_event_seat(
+        p_event_id integer,
+        p_user_id  text
+      )
       RETURNS TABLE(
-        booking_id INT,
-        event_id INT,
-        user_id TEXT,
-        seats_remaining INT,
-        total_seats INT,
-        was_created BOOLEAN
+        booking_id      integer,
+        event_id        integer,
+        user_id         text,
+        seats_remaining integer,
+        total_seats     integer,
+        was_created     boolean
       )
       LANGUAGE plpgsql
       AS $$
       DECLARE
-        v_event events%ROWTYPE;
-        v_booking_id INT;
-        v_remaining INT;
+        v_event       events%ROWTYPE;
+        v_booking_id  int;
+        v_remaining   int;
       BEGIN
-        SELECT * INTO v_event FROM events WHERE id = p_event_id FOR UPDATE;
+        -- Лочим событие
+        SELECT *
+        INTO v_event
+        FROM events e
+        WHERE e.id = p_event_id
+        FOR UPDATE;
+
         IF NOT FOUND THEN
           RAISE EXCEPTION 'EVENT_NOT_FOUND';
         END IF;
 
-        SELECT id INTO v_booking_id FROM bookings WHERE event_id = p_event_id AND user_id = p_user_id;
+        -- Ищем существующее бронирование: алиас обязателен
+        SELECT b.id
+        INTO v_booking_id
+        FROM bookings b
+        WHERE b.event_id = p_event_id
+          AND b.user_id  = p_user_id;
+
         IF FOUND THEN
           v_remaining := v_event.total_seats - v_event.booked_seats;
-          RETURN QUERY SELECT v_booking_id, p_event_id, p_user_id, v_remaining, v_event.total_seats, FALSE;
+          RETURN QUERY
+            SELECT v_booking_id, p_event_id, p_user_id, v_remaining, v_event.total_seats, FALSE;
           RETURN;
         END IF;
 
@@ -65,14 +81,15 @@ export class InitSchema1729890000000 implements MigrationInterface {
         VALUES (p_event_id, p_user_id)
         RETURNING id INTO v_booking_id;
 
-        UPDATE events
-        SET booked_seats = booked_seats + 1,
-            updated_at = NOW()
-        WHERE id = p_event_id;
+        UPDATE events e
+        SET booked_seats = e.booked_seats + 1,
+            updated_at   = now()
+        WHERE e.id = p_event_id;
 
         v_remaining := v_event.total_seats - (v_event.booked_seats + 1);
 
-        RETURN QUERY SELECT v_booking_id, p_event_id, p_user_id, v_remaining, v_event.total_seats, TRUE;
+        RETURN QUERY
+          SELECT v_booking_id, p_event_id, p_user_id, v_remaining, v_event.total_seats, TRUE;
       END;
       $$;
     `)

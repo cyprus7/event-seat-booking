@@ -6,6 +6,7 @@ import { AppModule } from './app.module'
 import { setupObservability } from './observability/otel'
 import { Logger } from '@nestjs/common'
 import { AllExceptionsFilter } from './common/filters/http-exception.filter'
+import type { Request } from 'express'
 
 async function bootstrap() {
     await setupObservability()
@@ -35,10 +36,10 @@ async function bootstrap() {
     // Use Nest Logger for application logs and add a simple request logger middleware
     app.useLogger(new Logger())
     const httpLogger = new Logger('HTTP')
-    app.use((req, _res, next) => {
+    app.use((req: Request & { body?: Record<string, unknown> }, _res, next) => {
         // Log method and url; include body when present to help debug validation errors
         try {
-            const body = (req as any).body
+            const body = req.body
             if (body && Object.keys(body).length) {
                 httpLogger.log(`${req.method} ${req.url} - body: ${JSON.stringify(body)}`)
             } else {

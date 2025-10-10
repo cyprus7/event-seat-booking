@@ -4,6 +4,8 @@ import { Transport } from '@nestjs/microservices'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { setupObservability } from './observability/otel'
+import { Logger } from '@nestjs/common'
+import { AllExceptionsFilter } from './common/filters/http-exception.filter'
 
 async function bootstrap() {
     await setupObservability()
@@ -26,6 +28,27 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
         }),
     )
+
+    // Register global exception filter to log HTTP errors (including ValidationPipe errors)
+    app.useGlobalFilters(new AllExceptionsFilter())
+
+    // Use Nest Logger for application logs and add a simple request logger middleware
+    app.useLogger(new Logger())
+    const httpLogger = new Logger('HTTP')
+    app.use((req, _res, next) => {
+        // Log method and url; include body when present to help debug validation errors
+        try {
+            const body = (req as any).body
+            if (body && Object.keys(body).length) {
+                httpLogger.log(`${req.method} ${req.url} - body: ${JSON.stringify(body)}`)
+            } else {
+                httpLogger.log(`${req.method} ${req.url}`)
+            }
+        } catch {
+            httpLogger.log(`${req.method} ${req.url}`)
+        }
+        next()
+    })
 
     // Swagger documentation
     const config = new DocumentBuilder()

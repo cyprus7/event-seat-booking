@@ -60,12 +60,11 @@ export class BookingsController {
         return this.bookingsService.findAll()
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Get booking by ID' })
-    @ApiResponse({ status: 200, description: 'Return booking by ID' })
-    @ApiResponse({ status: 404, description: 'Booking not found' })
-    findOne(@Param('id', ParseIntPipe) id: number) {
-        return this.bookingsService.findOne(id)
+    @Get('attendees')
+    @ApiOperation({ summary: 'Get attendees grouped by event' })
+    @ApiResponse({ status: 200, description: 'Return attendees grouped by event' })
+    findAttendees() {
+        return this.bookingsService.getEventAttendees()
     }
 
     @Get('event/:eventId')
@@ -75,11 +74,12 @@ export class BookingsController {
         return this.bookingsService.findByEvent(eventId)
     }
 
-    @Get('attendees')
-    @ApiOperation({ summary: 'Get attendees grouped by event' })
-    @ApiResponse({ status: 200, description: 'Return attendees grouped by event' })
-    findAttendees() {
-        return this.bookingsService.getEventAttendees()
+    @Get(':id')
+    @ApiOperation({ summary: 'Get booking by ID' })
+    @ApiResponse({ status: 200, description: 'Return booking by ID' })
+    @ApiResponse({ status: 404, description: 'Booking not found' })
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.bookingsService.findOne(id)
     }
 
     @Sse('attendees/stream')

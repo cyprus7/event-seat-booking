@@ -59,7 +59,7 @@ jobs:
           file: ./apps/frontend/Dockerfile
           push: true
           build-args: |
-            NEXT_PUBLIC_API_URL=/api/v1
+            NEXT_PUBLIC_API_URL=/api
           tags: |
             ${{ env.GHCR_REPO }}/frontend:${{ env.SHA_TAG }}
             ${{ env.GHCR_REPO }}/frontend:${{ env.TAG_ENV }}
